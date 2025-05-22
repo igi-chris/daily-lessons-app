@@ -31,10 +31,6 @@
 
     <!-- Main Content Area -->
     <div class="content">
-      <div class="content-header">
-        <h1>Daily Environmental Lessons</h1>
-      </div>
-
       <!-- If all lessons are finished -->
       <div v-if="finishedAll" class="message">
         <p><i class="fas fa-trophy"></i> Congratulations! You have completed all {{ totalLessons }} lessons!</p>
