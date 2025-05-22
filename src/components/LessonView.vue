@@ -24,6 +24,8 @@ import MarkdownIt from 'markdown-it';
   
 // Create a Markdown-It parser instance (no plugins for now, just base Markdown)
 const mdParser = new MarkdownIt();
+
+const emit = defineEmits(['titleLoaded']);
   
 const props = defineProps({
   lessonNumber: {
@@ -53,6 +55,13 @@ async function loadLesson(num) {
       return;
     }
     const markdownText = await res.text();
+    
+    // Extract title from markdown (typically first h1/h2)
+    const title = extractTitleFromMarkdown(markdownText, num);
+    
+    // Emit the title to parent component
+    emit('titleLoaded', { lessonNumber: num, title });
+    
     // Convert Markdown to HTML
     contentHtml.value = mdParser.render(markdownText);
   } catch (e) {
@@ -62,6 +71,22 @@ async function loadLesson(num) {
   } finally {
     isLoading.value = false;
   }
+}
+
+// Extract title from markdown content
+function extractTitleFromMarkdown(markdown, fallbackNumber) {
+  // First try to find a heading at the start of the document
+  // Look for # or ## patterns typical in markdown
+  const headingRegex = /^#+ (.+)$/m;
+  const match = markdown.match(headingRegex);
+  
+  if (match && match[1]) {
+    // Return the heading text without any markdown formatting
+    return match[1].trim();
+  }
+  
+  // Fallback title if no heading found
+  return `Lesson ${fallbackNumber}`;
 }
 
 // Function to retry loading when error occurs

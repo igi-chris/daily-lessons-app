@@ -15,12 +15,31 @@
       <!-- Navigation between lessons -->
       <div class="nav-buttons">
         <div class="nav-label">Lesson Navigation</div>
-        <button @click="prevLesson" :disabled="viewLessonNumber <= 1" class="nav-button secondary-button">
-          <i class="fas fa-chevron-left"></i> Previous
-        </button>
-        <button @click="nextLesson" :disabled="viewLessonNumber >= totalLessons" class="nav-button secondary-button">
-          Next <i class="fas fa-chevron-right"></i>
-        </button>
+        <div class="nav-row">
+          <button @click="prevLesson" :disabled="viewLessonNumber <= 1" class="nav-button secondary-button">
+            <i class="fas fa-chevron-left"></i> Previous
+          </button>
+          <button @click="nextLesson" :disabled="viewLessonNumber >= totalLessons" class="nav-button secondary-button">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Lesson List -->
+      <div class="lesson-list">
+        <div class="nav-label">All Lessons</div>
+        <div class="lesson-items">
+          <button 
+            v-for="n in totalLessons" 
+            :key="n" 
+            @click="goToLesson(n)" 
+            class="lesson-item" 
+            :class="{ active: viewLessonNumber === n }"
+          >
+            <span class="lesson-number">{{ n }}</span>
+            <span class="lesson-title">{{ lessonTitles[n-1] || `Lesson ${n}` }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -49,7 +68,10 @@
       <!-- Otherwise, show the current lesson content and the completion button -->
       <div v-else>
         <!-- Lesson content viewer -->
-        <LessonView :lesson-number="viewLessonNumber" />
+        <LessonView 
+          :lesson-number="viewLessonNumber" 
+          @title-loaded="handleTitleLoaded"
+        />
 
         <!-- "Mark Complete" button to finish the lesson -->
         <button @click="markComplete" class="complete-button">
@@ -67,12 +89,52 @@ import LessonView from './components/LessonView.vue';
 // Total number of lessons in the curriculum
 const totalLessons = 22;
 
+// Store dynamically loaded lesson titles
+const lessonTitles = ref(Array(totalLessons).fill(''));
+
+// Handle title loaded from LessonView component
+function handleTitleLoaded(data) {
+  // Update the title for this lesson in our array (zero-indexed array)
+  lessonTitles.value[data.lessonNumber - 1] = data.title;
+}
+
+// Preload all lesson titles on mount
+async function preloadLessonTitles() {
+  // For each lesson, fetch its markdown file and extract the title
+  for (let i = 1; i <= totalLessons; i++) {
+    try {
+      const res = await fetch(`lessons/lesson${i}.md`);
+      if (res.ok) {
+        const markdown = await res.text();
+        // Extract the title using the same regex as in LessonView
+        const headingRegex = /^#+ (.+)$/m;
+        const match = markdown.match(headingRegex);
+        if (match && match[1]) {
+          lessonTitles.value[i - 1] = match[1].trim();
+        } else {
+          lessonTitles.value[i - 1] = `Lesson ${i}`;
+        }
+      } else {
+        lessonTitles.value[i - 1] = `Lesson ${i}`;
+      }
+    } catch (e) {
+      console.error(`Failed to preload title for lesson ${i}`, e);
+      lessonTitles.value[i - 1] = `Lesson ${i}`;
+    }
+  }
+}
+
 // Reactive state for sidebar toggle on mobile
 const sidebarActive = ref(false);
 
 // Toggle sidebar on mobile
 function toggleSidebar() {
   sidebarActive.value = !sidebarActive.value;
+}
+
+// Navigate directly to a specific lesson
+function goToLesson(lessonNumber) {
+  viewLessonNumber.value = lessonNumber;
 }
 
 // Reactive state object for user progress
@@ -121,6 +183,9 @@ onMounted(() => {
     progress.lastLessonCompleted = 0;
     progress.streak = 0;
   }
+
+  // Preload all lesson titles for the sidebar
+  preloadLessonTitles();
 });
 
 // Compute if all lessons are completed
