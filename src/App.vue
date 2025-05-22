@@ -1,54 +1,65 @@
 <template>
-  <div class="app content">
-    <!-- App Title -->
-    <h1>Daily Environmental Lessons</h1>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar" :class="{ active: sidebarActive }">
+      <div class="sidebar-header">
+        <h1>Environmental Lessons</h1>
+        
+        <!-- Status bar showing lesson number and streak -->
+        <div class="status-bar">
+          <span><i class="fas fa-book-open"></i> Lesson {{ displayLessonNumber }} of {{ totalLessons }}</span>
+          <span class="streak">{{ streak }} day<span v-if="streak !== 1">s</span></span>
+        </div>
+      </div>
 
-    <!-- Status bar showing lesson number and streak -->
-    <div class="status-bar">
-      <span><i class="fas fa-book-open"></i> Lesson {{ displayLessonNumber }} of {{ totalLessons }}</span>
-      <span class="streak">{{ streak }} day<span v-if="streak !== 1">s</span></span>
+      <!-- Navigation between lessons -->
+      <div class="nav-buttons">
+        <div class="nav-label">Lesson Navigation</div>
+        <button @click="prevLesson" :disabled="viewLessonNumber <= 1" class="nav-button secondary-button">
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        <button @click="nextLesson" :disabled="viewLessonNumber >= totalLessons" class="nav-button secondary-button">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- Navigation between lessons -->
-    <div class="nav-buttons">
-      <button @click="prevLesson" :disabled="viewLessonNumber <= 1" class="nav-button secondary-button">
-        <i class="fas fa-chevron-left"></i> Previous
-      </button>
-      <span class="nav-label">Lesson {{ viewLessonNumber }} of {{ totalLessons }}</span>
-      <button @click="nextLesson" :disabled="viewLessonNumber >= totalLessons" class="nav-button secondary-button">
-        Next <i class="fas fa-chevron-right"></i>
-      </button>
-    </div>
+    <!-- Mobile sidebar toggle -->
+    <button @click="toggleSidebar" class="sidebar-toggle">
+      <i class="fas fa-bars"></i>
+    </button>
 
-    <!-- If all lessons are finished -->
-    <div v-if="finishedAll" class="message">
-      <p><i class="fas fa-trophy"></i> Congratulations! You have completed all {{ totalLessons }} lessons!</p>
-      <p>Your final streak: <strong>{{ streak }} days</strong>.</p>
-    </div>
+    <!-- Main Content Area -->
+    <div class="content">
+      <div class="content-header">
+        <h1>Daily Environmental Lessons</h1>
+      </div>
 
-    <!-- If user has completed today's lesson and must wait -->
-    <div v-else-if="doneForToday" class="message">
-      <p><i class="fas fa-check-circle"></i> You have completed Lesson {{ progress.lastLessonCompleted }} for today.</p>
-      <p><em>Come back tomorrow for Lesson {{ progress.lastLessonCompleted + 1 }}!</em></p>
-      <button @click="continueLesson" class="continue-button primary-button">
-        Continue to Next Lesson <i class="fas fa-forward"></i>
-      </button>
-    </div>
+      <!-- If all lessons are finished -->
+      <div v-if="finishedAll" class="message">
+        <p><i class="fas fa-trophy"></i> Congratulations! You have completed all {{ totalLessons }} lessons!</p>
+        <p>Your final streak: <strong>{{ streak }} days</strong>.</p>
+      </div>
 
-    <!-- Otherwise, show the current lesson content and the completion button -->
-    <div v-else>
-      <!-- Lesson content viewer -->
-      <LessonView :lesson-number="viewLessonNumber" />
+      <!-- If user has completed today's lesson and must wait -->
+      <div v-else-if="doneForToday" class="message">
+        <p><i class="fas fa-check-circle"></i> You have completed Lesson {{ progress.lastLessonCompleted }} for today.</p>
+        <p><em>Come back tomorrow for Lesson {{ progress.lastLessonCompleted + 1 }}!</em></p>
+        <button @click="continueLesson" class="continue-button primary-button">
+          Continue to Next Lesson <i class="fas fa-forward"></i>
+        </button>
+      </div>
 
-      <!-- "Mark Complete" button to finish the lesson -->
-      <button @click="markComplete" class="complete-button">
-        Mark Complete <i class="fas fa-check"></i>
-      </button>
+      <!-- Otherwise, show the current lesson content and the completion button -->
+      <div v-else>
+        <!-- Lesson content viewer -->
+        <LessonView :lesson-number="viewLessonNumber" />
 
-      <!-- "Skip Lesson" button to skip to the next lesson -->
-      <!-- <button @click="skipLesson" class="skip-button secondary-button" :disabled="viewLessonNumber >= totalLessons">
-        Skip Lesson ⏭️
-      </button> -->
+        <!-- "Mark Complete" button to finish the lesson -->
+        <button @click="markComplete" class="complete-button">
+          Mark Complete <i class="fas fa-check"></i>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -59,6 +70,14 @@ import LessonView from './components/LessonView.vue';
 
 // Total number of lessons in the curriculum
 const totalLessons = 22;
+
+// Reactive state for sidebar toggle on mobile
+const sidebarActive = ref(false);
+
+// Toggle sidebar on mobile
+function toggleSidebar() {
+  sidebarActive.value = !sidebarActive.value;
+}
 
 // Reactive state object for user progress
 const progress = reactive({
@@ -172,13 +191,6 @@ function markComplete() {
   // After marking complete, the next lesson becomes locked until tomorrow.
   // (UI will react to doneForToday computed becoming true since lastCompletedDate == todayStr now)
 }
-
-// Method to skip to the next lesson without marking complete
-// function skipLesson() {
-//   if (viewLessonNumber.value < totalLessons) {
-//     viewLessonNumber.value += 1;
-//   }
-// }
 
 // Method to bypass daily limit and load the next lesson immediately
 function continueLesson() {
