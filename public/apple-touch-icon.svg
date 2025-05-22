@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <!-- Background circle with padding for apple-touch-icon -->
+  <rect width="180" height="180" fill="#4a6741" rx="40" ry="40" />
+  
+  <!-- Leaf shape -->
+  <path d="M55,125 Q75,75 125,55 Q105,105 55,125 Z" fill="#8c9c72" />
+  
+  <!-- Water drop -->
+  <path d="M110,135 Q130,110 110,90 Q90,110 110,135 Z" fill="#3a7ca5" />
+  
+  <!-- Add a subtle glow -->
+  <rect x="5" y="5" width="170" height="170" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.2" rx="35" ry="35" />
+</svg> 
