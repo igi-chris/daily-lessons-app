@@ -15,7 +15,15 @@
   </div>
   
   <!-- Render the converted HTML content of the lesson -->
-  <div v-else v-html="contentHtml" class="lesson-content"></div>
+  <div v-else class="lesson-container">
+    <!-- AI content disclaimer -->
+    <div class="ai-disclaimer">
+      <i class="fas fa-robot"></i>
+      <p>{{ randomDisclaimer }}</p>
+    </div>
+    
+    <div v-html="contentHtml" class="lesson-content"></div>
+  </div>
 </template>
   
 <script setup>
@@ -33,6 +41,26 @@ const props = defineProps({
     required: true
   }
 });
+
+// Collection of witty disclaimers
+const disclaimers = [
+  "AI-generated content: 60% facts, 40% confident guesses, 100% enthusiasm!",
+  "This content was dreamt up by an AI. Approach with curiosity and a pinch of salt.",
+  "AI-crafted content: Like Wikipedia, but with more personality and fewer citations.",
+  "Our AI wrote this with digital fingers crossed. Verify before citing!",
+  "AI wisdom: Part science, part educated guesses, all delivered with confidence.",
+  "Created by an algorithm that's 87% confident about 62% of this content.",
+  "Knowledge by AI: Like having a very well-read but slightly confused friend.",
+  "Factual content with a sprinkle of AI imagination. Spot the difference!"
+];
+
+// Randomly select a disclaimer
+const randomDisclaimer = ref('');
+
+function selectRandomDisclaimer() {
+  const randomIndex = Math.floor(Math.random() * disclaimers.length);
+  randomDisclaimer.value = disclaimers[randomIndex];
+}
   
 // Reactive state for the lesson content HTML
 const contentHtml = ref('');
@@ -44,6 +72,9 @@ const errorMessage = ref('');
 async function loadLesson(num) {
   isLoading.value = true;
   hasError.value = false;
+  
+  // Select a new random disclaimer when loading a lesson
+  selectRandomDisclaimer();
   
   const url = `lessons/lesson${num}.md`;  // file path in public folder
   try {
@@ -96,6 +127,8 @@ function retryLoading() {
   
 // Load the lesson when component is mounted
 onMounted(() => {
+  // Select an initial random disclaimer
+  selectRandomDisclaimer();
   loadLesson(props.lessonNumber);
 });
   
@@ -165,6 +198,27 @@ watch(() => props.lessonNumber, (newLesson) => {
 .retry-button:hover {
   background-color: var(--primary-dark);
   transform: translateY(-2px);
+}
+
+.ai-disclaimer {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .ai-disclaimer {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.ai-disclaimer i {
+  font-size: 1.1rem;
+  color: var(--primary);
 }
 </style>
   
