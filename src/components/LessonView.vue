@@ -138,6 +138,11 @@ watch(() => props.lessonNumber, (newLesson) => {
   animation: spin 1s linear infinite;
 }
 
+[data-theme="dark"] .spinner {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary);
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

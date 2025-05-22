@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div class="app" :data-theme="theme">
     <!-- Sidebar -->
     <div class="sidebar" :class="{ active: sidebarActive }">
       <div class="sidebar-header">
@@ -10,6 +10,12 @@
           <span><i class="fas fa-book-open"></i> Lesson {{ displayLessonNumber }} of {{ totalLessons }}</span>
           <span class="streak">{{ streak }} day<span v-if="streak !== 1">s</span></span>
         </div>
+
+        <!-- Theme toggle button -->
+        <button @click="toggleTheme" class="theme-toggle">
+          <i :class="theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'"></i>
+          {{ theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}
+        </button>
       </div>
 
       <!-- Navigation between lessons -->
@@ -85,6 +91,45 @@
 <script setup>
 import { reactive, computed, ref, watch, onMounted } from 'vue';
 import LessonView from './components/LessonView.vue';
+
+// Theme state
+const theme = ref(localStorage.getItem('theme') || getPreferredTheme());
+
+// Function to get the user's preferred theme
+function getPreferredTheme() {
+  // Check if user prefers dark mode in their OS settings
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  return 'light';
+}
+
+// Function to toggle between light and dark themes
+function toggleTheme() {
+  theme.value = theme.value === 'dark' ? 'light' : 'dark';
+  // Save theme preference to localStorage
+  localStorage.setItem('theme', theme.value);
+}
+
+// Listen for system theme changes
+onMounted(() => {
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  
+  // Only update theme if user hasn't explicitly set a preference
+  const handleChange = (e) => {
+    if (!localStorage.getItem('theme')) {
+      theme.value = e.matches ? 'dark' : 'light';
+    }
+  };
+  
+  // Add event listener for theme changes
+  if (mediaQuery.addEventListener) {
+    mediaQuery.addEventListener('change', handleChange);
+  } else {
+    // Fallback for older browsers
+    mediaQuery.addListener(handleChange);
+  }
+});
 
 // Total number of lessons in the curriculum
 const totalLessons = 22;
