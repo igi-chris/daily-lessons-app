@@ -5,29 +5,33 @@
 
     <!-- Status bar showing lesson number and streak -->
     <div class="status-bar">
-      <span>Lesson {{ displayLessonNumber }} of {{ totalLessons }}</span>
-      <span class="streak">🔥 Streak: {{ streak }} day<span v-if="streak !== 1">s</span></span>
+      <span><i class="fas fa-book-open"></i> Lesson {{ displayLessonNumber }} of {{ totalLessons }}</span>
+      <span class="streak">{{ streak }} day<span v-if="streak !== 1">s</span></span>
     </div>
 
     <!-- Navigation between lessons -->
     <div class="nav-buttons">
-      <button @click="prevLesson" :disabled="viewLessonNumber <= 1" class="nav-button">◀️ Previous</button>
+      <button @click="prevLesson" :disabled="viewLessonNumber <= 1" class="nav-button secondary-button">
+        <i class="fas fa-chevron-left"></i> Previous
+      </button>
       <span class="nav-label">Lesson {{ viewLessonNumber }} of {{ totalLessons }}</span>
-      <button @click="nextLesson" :disabled="viewLessonNumber >= totalLessons" class="nav-button">Next ▶️</button>
+      <button @click="nextLesson" :disabled="viewLessonNumber >= totalLessons" class="nav-button secondary-button">
+        Next <i class="fas fa-chevron-right"></i>
+      </button>
     </div>
 
     <!-- If all lessons are finished -->
     <div v-if="finishedAll" class="message">
-      <p>🎉 Congratulations! You have completed all {{ totalLessons }} lessons!</p>
+      <p><i class="fas fa-trophy"></i> Congratulations! You have completed all {{ totalLessons }} lessons!</p>
       <p>Your final streak: <strong>{{ streak }} days</strong>.</p>
     </div>
 
     <!-- If user has completed today's lesson and must wait -->
     <div v-else-if="doneForToday" class="message">
-      <p>You have completed Lesson {{ progress.lastLessonCompleted }} for today.</p>
+      <p><i class="fas fa-check-circle"></i> You have completed Lesson {{ progress.lastLessonCompleted }} for today.</p>
       <p><em>Come back tomorrow for Lesson {{ progress.lastLessonCompleted + 1 }}!</em></p>
-      <button @click="continueLesson" class="continue-button">
-        Continue to Next Lesson ⏭️
+      <button @click="continueLesson" class="continue-button primary-button">
+        Continue to Next Lesson <i class="fas fa-forward"></i>
       </button>
     </div>
 
@@ -38,13 +42,13 @@
 
       <!-- "Mark Complete" button to finish the lesson -->
       <button @click="markComplete" class="complete-button">
-        Mark Complete ✅
+        Mark Complete <i class="fas fa-check"></i>
       </button>
 
       <!-- "Skip Lesson" button to skip to the next lesson -->
-      <button @click="skipLesson" class="skip-button" :disabled="viewLessonNumber >= totalLessons">
+      <!-- <button @click="skipLesson" class="skip-button secondary-button" :disabled="viewLessonNumber >= totalLessons">
         Skip Lesson ⏭️
-      </button>
+      </button> -->
     </div>
   </div>
 </template>
@@ -170,11 +174,11 @@ function markComplete() {
 }
 
 // Method to skip to the next lesson without marking complete
-function skipLesson() {
-  if (viewLessonNumber.value < totalLessons) {
-    viewLessonNumber.value += 1;
-  }
-}
+// function skipLesson() {
+//   if (viewLessonNumber.value < totalLessons) {
+//     viewLessonNumber.value += 1;
+//   }
+// }
 
 // Method to bypass daily limit and load the next lesson immediately
 function continueLesson() {
